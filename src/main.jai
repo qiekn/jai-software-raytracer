@@ -9,6 +9,7 @@ main :: () {
     pixels := NewArray(WIDTH * HEIGHT * 3, u8);
 
     for y : 0..HEIGHT-1 {
+        print("\rScanlines remaining: %    ", HEIGHT - y);
         for x : 0..WIDTH-1 {
             index := (y * WIDTH + x) * 3;
 
@@ -21,6 +22,7 @@ main :: () {
             pixels[index + 2] = b;
         }
     }
+    print("\rDone.                     \n");
 
     filename := make_filename();
     stbi_write_png(filename.data, WIDTH, HEIGHT, 3, pixels.data, WIDTH * 3);
