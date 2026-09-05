@@ -1,5 +1,6 @@
 #import "Basic";
 #import "stb_image_write";
+#load "utils.jai";
 
 WIDTH  :: 512;
 HEIGHT :: 512;
@@ -21,6 +22,6 @@ main :: () {
         }
     }
 
-    result := stbi_write_png("result.png", WIDTH, HEIGHT, 3, pixels.data, WIDTH * 3);
-    assert(result != 0);
+    filename := make_filename();
+    stbi_write_png(filename.data, WIDTH, HEIGHT, 3, pixels.data, WIDTH * 3);
 }
