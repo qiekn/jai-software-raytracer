@@ -60,7 +60,18 @@ main :: () {
     stbi_write_png(filename.data, image_width, image_height, 3, pixels.data, image_width * 3);
 }
 
+hit_sphere :: (center : Vector3, radius : float, ray: Ray) -> bool {
+    oc := center - ray.origin;
+    a := dot(ray.direction, ray.direction);
+    b := -2.0 * dot(ray.direction, oc);
+    c := dot(oc, oc) - radius * radius;
+    discriminant := b*b - 4*a*c;
+    return discriminant >= 0;
+}
+
 ray_color :: () -> Vector3 #expand {
+    if (hit_sphere(Vector3.{0,0,-1}, 0.5, `ray)) then return Vector3.{0, 1, 1};
+
     unit_direction := unit_vector(`ray.direction);
     a := 0.5 * (unit_direction.y + 1.0);
     return (1.0 - a) * Vector3.{1, 1, 1} + a * Vector3.{0.5, 0.7, 1.0};
