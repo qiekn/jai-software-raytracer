@@ -41,3 +41,12 @@ write_pixel_color :: (pixels: []u8, index: int, color: Pixel_Color) {
     pixels[index + 2] = color.z;
 }
 
+// ----------------------------------------------------------------------------: Vector3
+
+operator + :: (v : Vector3, x : float) -> Vector3 {
+    return .{v.x+x, v.y+x, v.z+x};
+}
+
+operator - :: (v : Vector3, x : float) -> Vector3 {
+    return .{v.x-x, v.y-x, v.z-x};
+}
