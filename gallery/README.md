@@ -38,3 +38,15 @@
 
 ![008_metal_material.png](008_metal_material.png)
 
+### 009_dielectric_material.png
+
+![009_dielectric_material.png](009_dielectric_material.png)
+
+### 010_camera_close.png
+
+![010_camera_close.png](010_camera_close.png)
+
+### 010_camera_far.png
+
+![010_camera_far.png](010_camera_far.png)
+

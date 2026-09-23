@@ -4,6 +4,11 @@ image_width       : s32   = 400;        // Rendered image width in pixel count
 samples_per_pixel : s32   = 10;         // Count of random samples for each pixel
 max_depth         : s32   = 10;         // Maximum number of ray bounces into scene
 
+vfov      : float   = 90;          // Vertical view angle (field of view), in degrees
+look_from : Vector3 = .{0, 0,  0}; // Point camera is looking from
+look_at   : Vector3 = .{0, 0, -1}; // Point camera is looking at
+vup       : Vector3 = .{0, 1,  0}; // Camera-relative "up" direction
+
 // Derived state, filled by init_camera().
 image_height        : s32;      // Rendered image height
 pixel_samples_scale : float;    // Color scale factor for a sum of pixel samples
@@ -11,6 +16,10 @@ camera_center       : Vector3;  // Camera center
 pixel00_loc         : Vector3;  // Location of pixel 0, 0
 pixel_delta_u       : Vector3;  // Offset to pixel to the right
 pixel_delta_v       : Vector3;  // Offset to pixel below
+
+// Camera frame basis vectors: right, up, and opposite the view direction.
+// Prefixed so parameters named `v` etc. elsewhere don't silently shadow them.
+camera_u, camera_v, camera_w : Vector3;
 
 render :: (world : World) {
     init_camera();
@@ -39,22 +48,30 @@ init_camera :: () {
 
     pixel_samples_scale = 1.0 / samples_per_pixel;
 
-    camera_center = .{0, 0, 0};
+    camera_center = look_from;
 
-    focal_length    := 1.0;
-    viewport_height := 2.0;
+    // Determine viewport dimensions.
+    focal_length    := length(look_from - look_at);
+    theta           := degrees_to_radians(vfov);
+    h               := tan(theta / 2);
+    viewport_height := 2 * h * focal_length;
     viewport_width  := viewport_height * (cast(float)image_width / image_height);
 
+    // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+    camera_w = unit_vector(look_from - look_at);
+    camera_u = unit_vector(cross(vup, camera_w));
+    camera_v = cross(camera_w, camera_u);
+
     // Calculate the vectors across the horizontal and down the vertical viewport edges.
-    viewport_u := Vector3.{viewport_width, 0, 0};
-    viewport_v := Vector3.{0, -viewport_height, 0};
+    viewport_u := viewport_width  *  camera_u;
+    viewport_v := viewport_height * -camera_v;
 
     // Calculate the horizontal and vertical delta vectors from pixel to pixel.
     pixel_delta_u = viewport_u / image_width.(float);
     pixel_delta_v = viewport_v / image_height.(float);
 
     // Upper-left corner of the viewport.
-    viewport_upper_left := camera_center - Vector3.{0, 0, focal_length}
+    viewport_upper_left := camera_center - focal_length * camera_w
                                          - viewport_u / 2.0
                                          - viewport_v / 2.0;
 
