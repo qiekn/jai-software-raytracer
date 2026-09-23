@@ -105,6 +105,17 @@ reflect :: (v : Vector3, n : Vector3) -> Vector3 {
     return v - 2 * dot(v, n) * n;
 }
 
+//
+// Bend the unit vector `uv` through a surface with unit normal `n` (Snell's law).
+// `etai_over_etat` is the refractive index on the incoming side over the outgoing side.
+//
+refract :: (uv : Vector3, n : Vector3, etai_over_etat : float) -> Vector3 {
+    cos_theta := min(dot(-uv, n), 1.0);
+    r_out_perp     := etai_over_etat * (uv + cos_theta * n);
+    r_out_parallel := -sqrt(abs(1.0 - length_squared(r_out_perp))) * n;
+    return r_out_perp + r_out_parallel;
+}
+
 operator + :: (v : Vector3, x : float) -> Vector3 {
     return .{v.x+x, v.y+x, v.z+x};
 }

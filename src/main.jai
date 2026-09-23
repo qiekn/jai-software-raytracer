@@ -1,13 +1,15 @@
 main :: () {
     material_ground := lambertian(.{0.8, 0.8, 0.0});
     material_center := lambertian(.{0.1, 0.2, 0.5});
-    material_left   := metal(.{0.8, 0.8, 0.8}, 0.3);
-    material_right  := metal(.{0.8, 0.6, 0.2}, 1.0);
+    material_left   := dielectric(1.50);
+    material_bubble := dielectric(1.00 / 1.50);  // Air inside glass: hollow glass sphere
+    material_right  := metal(.{0.8, 0.6, 0.2}, 0.0);
 
     world : World;
     array_add(*world.spheres, Sphere.{.{ 0.0, -100.5, -1.0}, 100.0, material_ground});
     array_add(*world.spheres, Sphere.{.{ 0.0,    0.0, -1.2},   0.5, material_center});
     array_add(*world.spheres, Sphere.{.{-1.0,    0.0, -1.0},   0.5, material_left});
+    array_add(*world.spheres, Sphere.{.{-1.0,    0.0, -1.0},   0.4, material_bubble});
     array_add(*world.spheres, Sphere.{.{ 1.0,    0.0, -1.0},   0.5, material_right});
 
     samples_per_pixel = 100;
