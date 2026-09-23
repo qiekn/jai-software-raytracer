@@ -3,6 +3,9 @@ main :: () {
     array_add(*world.spheres, Sphere.{center = .{0,      0, -1}, radius = 0.5});
     array_add(*world.spheres, Sphere.{center = .{0, -100.5, -1}, radius = 100});
 
+    samples_per_pixel = 100;
+    max_depth         = 50;
+
     render(world);
 }
 

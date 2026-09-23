@@ -42,13 +42,53 @@ to_pixel :: (color : Vector3) -> Pixel {
     // Translate the [0,1] component values to the byte range [0,255].
     to_u8 :: (x : float) -> u8 {
         INTENSITY :: Interval.{0.000, 0.999};
-        return cast(u8)(256 * clamp(INTENSITY, x));
+        return cast(u8)(256 * clamp(INTENSITY, linear_to_gamma(x)));
     }
 
     return .{to_u8(color.x), to_u8(color.y), to_u8(color.z)};
 }
 
+//
+// Image viewers expect gamma space; we render in linear space. Use "gamma 2", i.e. sqrt.
+//
+linear_to_gamma :: (linear_component : float) -> float {
+    if linear_component > 0  return sqrt(linear_component);
+    return 0;
+}
+
 // ----------------------------------------------------------------------------: Vector3
+
+random_vector3 :: () -> Vector3 {
+    return .{random_get_zero_to_one_open(), random_get_zero_to_one_open(), random_get_zero_to_one_open()};
+}
+
+random_vector3 :: (min : float, max : float) -> Vector3 {
+    return .{random_get_within_range(min, max), random_get_within_range(min, max), random_get_within_range(min, max)};
+}
+
+//
+// Rejection method: pick points in the [-1,1] cube until one lies inside the unit sphere,
+// then normalize it onto the surface.
+//
+random_unit_vector :: () -> Vector3 {
+    while true {
+        p := random_vector3(-1, 1);
+        lensq := length_squared(p);
+        // Also reject points so close to the center that normalizing would blow up.
+        if FLOAT32_MIN < lensq && lensq <= 1  return p / sqrt(lensq);
+    }
+    return .{};  // Unreachable
+}
+
+//
+// Uniform over the hemisphere around `normal`. Superseded by Lambertian
+// (`normal + random_unit_vector()`), kept for comparison.
+//
+random_on_hemisphere :: (normal : Vector3) -> Vector3 {
+    on_unit_sphere := random_unit_vector();
+    if dot(on_unit_sphere, normal) > 0  return on_unit_sphere;  // Same hemisphere as the normal
+    return -on_unit_sphere;
+}
 
 operator + :: (v : Vector3, x : float) -> Vector3 {
     return .{v.x+x, v.y+x, v.z+x};

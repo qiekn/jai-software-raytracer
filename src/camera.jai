@@ -2,6 +2,7 @@
 aspect_ratio      : float = 4.0 / 3.0;  // Ratio of image width over height
 image_width       : s32   = 400;        // Rendered image width in pixel count
 samples_per_pixel : s32   = 10;         // Count of random samples for each pixel
+max_depth         : s32   = 10;         // Maximum number of ray bounces into scene
 
 // Derived state, filled by init_camera().
 image_height        : s32;      // Rendered image height
@@ -21,7 +22,7 @@ render :: (world : World) {
         for x : 0..image_width-1 {
             color : Vector3;
             for 1..samples_per_pixel {
-                color += ray_color(get_ray(x, y), world);
+                color += ray_color(get_ray(x, y), max_depth, world);
             }
             pixels[y * image_width + x] = to_pixel(pixel_samples_scale * color);
         }
@@ -80,10 +81,16 @@ sample_square :: () -> Vector3 {
     return .{random_get_zero_to_one_open() - 0.5, random_get_zero_to_one_open() - 0.5, 0};
 }
 
-ray_color :: (ray : Ray, world : World) -> Vector3 {
-    ok, rec := hit(world, ray, Interval.{0, FLOAT32_INFINITY});
+ray_color :: (ray : Ray, depth : s32, world : World) -> Vector3 {
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if depth <= 0  return .{0, 0, 0};
+
+    // t starts at 0.001, not 0: a bounced ray whose origin rounded to just below
+    // the surface would otherwise hit that same surface again ("shadow acne").
+    ok, rec := hit(world, ray, Interval.{0.001, FLOAT32_INFINITY});
     if ok {
-        return 0.5 * (rec.normal + 1.0); // [-1, 1] -> [0, 1]
+        direction := rec.normal + random_unit_vector();  // Lambertian distribution
+        return 0.5 * ray_color(.{origin = rec.p, direction = direction}, depth - 1, world);
     }
 
     unit_direction := unit_vector(ray.direction);

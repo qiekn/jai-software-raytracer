@@ -30,3 +30,7 @@
 
 ![006_multi_objects_anti-aliasing.png](006_multi_objects_anti-aliasing.png)
 
+### 007_defuse_material.png
+
+![007_defuse_material.png](007_defuse_material.png)
+
