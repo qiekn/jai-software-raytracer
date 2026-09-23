@@ -20,28 +20,30 @@ make_filename :: (extension: string = "png") -> string {
     );
 }
 
-// ----------------------------------------------------------------------------: color
+// ----------------------------------------------------------------------------: math
 
-Pixel_Color :: struct {
-    x, y, z : u8;
+// PI and FLOAT32_INFINITY already come from Math.
+degrees_to_radians :: (degrees : float) -> float {
+    return degrees * PI / 180.0;
 }
 
-to_pixel_color :: (color : Vector3) -> Pixel_Color {
-    to_u8 :: (num : float) -> u8 {
-        return cast(u8)(255.999 * num);
+// ----------------------------------------------------------------------------: color
+
+//
+// `Vector3` is the float color used while rendering, in [0, 1].
+// `Pixel` is what gets written to the PNG. `to_pixel` is the only conversion between them.
+//
+Pixel :: struct {
+    r, g, b : u8;
+}
+#assert size_of(Pixel) == 3;  // stbi_write_png expects tightly packed RGB
+
+to_pixel :: (color : Vector3) -> Pixel {
+    to_u8 :: (x : float) -> u8 {
+        return cast(u8)(255.999 * x);
     }
 
     return .{to_u8(color.x), to_u8(color.y), to_u8(color.z)};
-}
-
-write_color :: (pixels: []u8, index: int, color: Vector3) {
-    write_pixel_color(pixels, index, to_pixel_color(color));
-}
-
-write_pixel_color :: (pixels: []u8, index: int, color: Pixel_Color) {
-    pixels[index + 0] = color.x;
-    pixels[index + 1] = color.y;
-    pixels[index + 2] = color.z;
 }
 
 // ----------------------------------------------------------------------------: Vector3

@@ -1,5 +1,5 @@
 Ray :: struct {
-    origin:    Vector3;
+    origin :    Vector3;
     direction:= Vector3.{0,0,-1};
 }
 

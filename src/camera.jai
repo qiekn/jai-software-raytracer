@@ -1,17 +1,40 @@
-image_width  : s32;    // Rendered image width in pexel count
-image_height : s32;    // Rendered image height
-aspect_ratio : float;  // Ratio of image width over height
+// Camera parameters: set these before calling render().
+aspect_ratio : float = 4.0 / 3.0;  // Ratio of image width over height
+image_width  : s32   = 400;        // Rendered image width in pixel count
 
+// Derived state, filled by init_camera().
+image_height  : s32;      // Rendered image height
 camera_center : Vector3;  // Camera center
-pixel00_loc   : Vector3;  // Location ofpixel 0, 0
+pixel00_loc   : Vector3;  // Location of pixel 0, 0
 pixel_delta_u : Vector3;  // Offset to pixel to the right
-pixel_delta_v : Vector3;  // Offset to pixel blow
+pixel_delta_v : Vector3;  // Offset to pixel below
+
+render :: (world : World) {
+    init_camera();
+
+    pixels := NewArray(image_width * image_height, Pixel);
+
+    for y : 0..image_height-1 {
+        print("\rScanlines remaining: %    ", image_height - y);
+        for x : 0..image_width-1 {
+            pixel_center := pixel00_loc + x.(float) * pixel_delta_u + y.(float) * pixel_delta_v;
+
+            ray : Ray;
+            ray.direction = pixel_center - camera_center;
+            ray.origin = camera_center;
+
+            pixels[y * image_width + x] = to_pixel(ray_color(ray, world));
+        }
+    }
+    print("\rDone.                     \n");
+
+    filename := make_filename();
+    stbi_write_png(filename.data, image_width, image_height, 3, pixels.data, image_width * 3);
+}
 
 init_camera :: () {
-    aspect_ratio = 4.0 / 3.0;
-
-    image_width  = 400;
     image_height = xx (image_width / aspect_ratio);
+    image_height = max(image_height, 1);
 
     camera_center = .{0, 0, 0};
 
@@ -36,26 +59,13 @@ init_camera :: () {
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 }
 
-render :: () {
-    pixels := NewArray(image_width * image_height * 3, u8);
-    color : Pixel_Color;
-
-    for y : 0..image_height-1 {
-        print("\rScanlines remaining: %    ", image_height - y);
-        for x : 0..image_width-1 {
-            pixel_center := pixel00_loc + x.(float) * pixel_delta_u + y.(float) * pixel_delta_v;
-
-            ray : Ray;
-            ray.direction = pixel_center - camera_center;
-            ray.origin = camera_center;
-
-            color := ray_color(ray);
-            index := (y * image_width + x) * 3;
-            write_color(pixels, index, color);
-        }
+ray_color :: (ray : Ray, world : World) -> Vector3 {
+    ok, rec := hit(world, ray, Interval.{0, FLOAT32_INFINITY});
+    if ok {
+        return 0.5 * (rec.normal + 1.0); // [-1, 1] -> [0, 1]
     }
-    print("\rDone.                     \n");
 
-    filename := make_filename();
-    stbi_write_png(filename.data, image_width, image_height, 3, pixels.data, image_width * 3);
+    unit_direction := unit_vector(ray.direction);
+    a := 0.5 * (unit_direction.y + 1.0);
+    return (1.0 - a) * Vector3.{1, 1, 1} + a * Vector3.{0.5, 0.7, 1.0};
 }

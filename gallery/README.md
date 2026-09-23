@@ -22,3 +22,7 @@
 
 ![005_sphere_colored_by_normals.png](005_sphere_colored_by_normals.png)
 
+### 006_multi_objects.png
+
+![006_multi_objects.png](006_multi_objects.png)
+
