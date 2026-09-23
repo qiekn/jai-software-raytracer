@@ -17,3 +17,9 @@ contains :: (interval : Interval, x : float) -> bool {
 surrounds :: (interval : Interval, x : float) -> bool {
     return interval.min < x && x < interval.max;
 }
+
+clamp :: (interval : Interval, x : float) -> float {
+    if x < interval.min  return interval.min;
+    if x > interval.max  return interval.max;
+    return x;
+}

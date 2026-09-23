@@ -39,8 +39,10 @@ Pixel :: struct {
 #assert size_of(Pixel) == 3;  // stbi_write_png expects tightly packed RGB
 
 to_pixel :: (color : Vector3) -> Pixel {
+    // Translate the [0,1] component values to the byte range [0,255].
     to_u8 :: (x : float) -> u8 {
-        return cast(u8)(255.999 * x);
+        INTENSITY :: Interval.{0.000, 0.999};
+        return cast(u8)(256 * clamp(INTENSITY, x));
     }
 
     return .{to_u8(color.x), to_u8(color.y), to_u8(color.z)};

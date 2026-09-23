@@ -8,6 +8,7 @@ main :: () {
 
 #import "Basic";
 #import "Math";
+#import "Random";
 #import "stb_image_write";
 
 #load "utils.jai";
