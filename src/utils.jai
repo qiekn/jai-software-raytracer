@@ -2,6 +2,9 @@
 
 // ----------------------------------------------------------------------------: format result.png
 
+//
+// So our output file be like:   "2026-09-17_14-49-11.png"
+//
 make_filename :: (extension: string = "png") -> string {
     now := to_calendar(current_time_consensus(), .LOCAL);
 
