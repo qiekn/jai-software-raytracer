@@ -1,8 +1,9 @@
 Hit_Record :: struct {
     p          : Vector3;
-    normal     : Vector3;  // Always points against the incident ray
+    normal     : Vector3;   // Always points against the incident ray
+    material   : Material;  // Copied from the object that was hit
     t          : float;
-    front_face : bool;     // True if the ray hit the outside of the surface
+    front_face : bool;      // True if the ray hit the outside of the surface
 }
 
 //

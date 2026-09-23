@@ -34,3 +34,7 @@
 
 ![007_defuse_material.png](007_defuse_material.png)
 
+### 008_metal_material.png
+
+![008_metal_material.png](008_metal_material.png)
+

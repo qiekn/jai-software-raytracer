@@ -89,8 +89,9 @@ ray_color :: (ray : Ray, depth : s32, world : World) -> Vector3 {
     // the surface would otherwise hit that same surface again ("shadow acne").
     ok, rec := hit(world, ray, Interval.{0.001, FLOAT32_INFINITY});
     if ok {
-        direction := rec.normal + random_unit_vector();  // Lambertian distribution
-        return 0.5 * ray_color(.{origin = rec.p, direction = direction}, depth - 1, world);
+        did_scatter, attenuation, scattered := scatter(rec.material, ray, rec);
+        if did_scatter  return attenuation * ray_color(scattered, depth - 1, world);
+        return .{0, 0, 0};
     }
 
     unit_direction := unit_vector(ray.direction);

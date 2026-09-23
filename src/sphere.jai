@@ -1,6 +1,7 @@
 Sphere :: struct {
-    center : Vector3;
-    radius : float;
+    center   : Vector3;
+    radius   : float;
+    material : Material;
 }
 
 hit :: (using sphere : Sphere, ray : Ray, ray_t : Interval) -> bool, Hit_Record {
@@ -27,6 +28,7 @@ hit :: (using sphere : Sphere, ray : Ray, ray_t : Interval) -> bool, Hit_Record 
     rec.p = ray_at(ray, rec.t);
     outward_normal := (rec.p - center) / radius;
     set_face_normal(*rec, ray, outward_normal);
+    rec.material = material;
 
     return true, rec;
 }

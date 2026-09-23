@@ -90,6 +90,21 @@ random_on_hemisphere :: (normal : Vector3) -> Vector3 {
     return -on_unit_sphere;
 }
 
+//
+// True if the vector is close to zero in all dimensions.
+//
+near_zero :: (v : Vector3) -> bool {
+    S :: 1.0e-8;
+    return abs(v.x) < S && abs(v.y) < S && abs(v.z) < S;
+}
+
+//
+// Mirror `v` about the surface with unit normal `n`.
+//
+reflect :: (v : Vector3, n : Vector3) -> Vector3 {
+    return v - 2 * dot(v, n) * n;
+}
+
 operator + :: (v : Vector3, x : float) -> Vector3 {
     return .{v.x+x, v.y+x, v.z+x};
 }
