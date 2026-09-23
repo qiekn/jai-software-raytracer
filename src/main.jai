@@ -15,10 +15,13 @@ main :: () {
     samples_per_pixel = 100;
     max_depth         = 50;
 
-    vfov      = 90;
+    vfov      = 20;
     look_from = .{-2, 2,  1};
     look_at   = .{ 0, 0, -1};
     vup       = .{ 0, 1,  0};
+
+    defocus_angle = 10.0;
+    focus_dist    = 3.4;
 
     render(world);
 }

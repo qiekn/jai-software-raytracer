@@ -9,6 +9,9 @@ look_from : Vector3 = .{0, 0,  0}; // Point camera is looking from
 look_at   : Vector3 = .{0, 0, -1}; // Point camera is looking at
 vup       : Vector3 = .{0, 1,  0}; // Camera-relative "up" direction
 
+defocus_angle : float = 0;   // Variation angle of rays through each pixel, in degrees (0 = pinhole)
+focus_dist    : float = 10;  // Distance from look_from to the plane of perfect focus
+
 // Derived state, filled by init_camera().
 image_height        : s32;      // Rendered image height
 pixel_samples_scale : float;    // Color scale factor for a sum of pixel samples
@@ -16,6 +19,8 @@ camera_center       : Vector3;  // Camera center
 pixel00_loc         : Vector3;  // Location of pixel 0, 0
 pixel_delta_u       : Vector3;  // Offset to pixel to the right
 pixel_delta_v       : Vector3;  // Offset to pixel below
+defocus_disk_u      : Vector3;  // Defocus disk horizontal radius
+defocus_disk_v      : Vector3;  // Defocus disk vertical radius
 
 // Camera frame basis vectors: right, up, and opposite the view direction.
 // Prefixed so parameters named `v` etc. elsewhere don't silently shadow them.
@@ -50,11 +55,10 @@ init_camera :: () {
 
     camera_center = look_from;
 
-    // Determine viewport dimensions.
-    focal_length    := length(look_from - look_at);
+    // Determine viewport dimensions. The viewport sits on the focus plane.
     theta           := degrees_to_radians(vfov);
     h               := tan(theta / 2);
-    viewport_height := 2 * h * focal_length;
+    viewport_height := 2 * h * focus_dist;
     viewport_width  := viewport_height * (cast(float)image_width / image_height);
 
     // Calculate the u,v,w unit basis vectors for the camera coordinate frame.
@@ -71,16 +75,23 @@ init_camera :: () {
     pixel_delta_v = viewport_v / image_height.(float);
 
     // Upper-left corner of the viewport.
-    viewport_upper_left := camera_center - focal_length * camera_w
+    viewport_upper_left := camera_center - focus_dist * camera_w
                                          - viewport_u / 2.0
                                          - viewport_v / 2.0;
 
     // Center of pixel (0, 0).
     pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
+
+    // Camera defocus disk basis vectors. The disk is the base of a cone whose apex is
+    // at the viewport center and whose opening angle is defocus_angle.
+    defocus_radius := focus_dist * tan(degrees_to_radians(defocus_angle / 2));
+    defocus_disk_u = defocus_radius * camera_u;
+    defocus_disk_v = defocus_radius * camera_v;
 }
 
 //
-// A ray from the camera center through a random point inside pixel (x, y).
+// A ray from a random point on the defocus disk (or the camera center, for a pinhole)
+// through a random point inside pixel (x, y).
 //
 get_ray :: (x : s32, y : s32) -> Ray {
     offset := sample_square();
@@ -88,7 +99,16 @@ get_ray :: (x : s32, y : s32) -> Ray {
                   + (x.(float) + offset.x) * pixel_delta_u
                   + (y.(float) + offset.y) * pixel_delta_v;
 
-    return .{origin = camera_center, direction = pixel_sample - camera_center};
+    ray_origin := ifx defocus_angle <= 0 then camera_center else defocus_disk_sample();
+    return .{origin = ray_origin, direction = pixel_sample - ray_origin};
+}
+
+//
+// A random point in the camera defocus disk.
+//
+defocus_disk_sample :: () -> Vector3 {
+    p := random_in_unit_disk();
+    return camera_center + p.x * defocus_disk_u + p.y * defocus_disk_v;
 }
 
 //

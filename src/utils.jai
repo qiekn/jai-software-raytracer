@@ -81,6 +81,17 @@ random_unit_vector :: () -> Vector3 {
 }
 
 //
+// A random point inside the unit disk on the z = 0 plane, by the same rejection method.
+//
+random_in_unit_disk :: () -> Vector3 {
+    while true {
+        p := Vector3.{random_get_within_range(-1, 1), random_get_within_range(-1, 1), 0};
+        if length_squared(p) < 1  return p;
+    }
+    return .{};  // Unreachable
+}
+
+//
 // Uniform over the hemisphere around `normal`. Superseded by Lambertian
 // (`normal + random_unit_vector()`), kept for comparison.
 //
