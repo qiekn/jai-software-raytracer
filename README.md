@@ -1,3 +1,5 @@
 # Jai Software Raytracing Renderer
 
-[my old c++ implementation practice: qiekn/raytracing](https://github.com/qiekn/raytracing)
+[Gallery](./gallery/README.md)
+
+[Old C++ implementation practice: qiekn/raytracing](https://github.com/qiekn/raytracing)
