@@ -54,3 +54,11 @@
 
 ![011_defocus_blur.png](011_defocus_blur.png)
 
+### 012_part1_final.png
+
+![012_part1_final.png](012_part1_final.png)
+
+### 012_part1_final_alt.png
+
+![012_part1_final_alt.png](012_part1_final_alt.png)
+
